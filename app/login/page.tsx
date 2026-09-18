@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-
 export default function LoginPage() {
   const router = useRouter();
   const [err, setErr] = useState("");
@@ -23,16 +22,14 @@ export default function LoginPage() {
     router.push("/dashboard");
   }
   return (
-    <main className="mx-auto flex min-h-screen max-w-md items-center px-5">
-      <form onSubmit={onSubmit} className="w-full rounded-2xl border border-white/10 bg-[#0e1524] p-6">
-        <h1 className="text-xl font-semibold">Login</h1>
-        <label className="mt-5 block text-xs text-white/50">Email or username</label>
-        <input name="email" className="mt-1 w-full rounded-lg border border-white/10 bg-[#070b14] px-3 py-2" />
-        <label className="mt-4 block text-xs text-white/50">Password</label>
-        <input type="password" name="password" className="mt-1 w-full rounded-lg border border-white/10 bg-[#070b14] px-3 py-2" />
-        {err && <p className="mt-3 text-sm text-[#ff2d55]">{err}</p>}
-        <button disabled={loading} className="mt-5 w-full rounded-lg bg-[#ff2d55] py-2.5 text-sm font-semibold">{loading ? "Saving..." : "Continue"}</button>
-        <p className="mt-4 text-center text-sm"><Link href="/register">Create account</Link></p>
+    <main className={"mx-auto flex min-h-screen max-w-md items-center px-5"}>
+      <form onSubmit={onSubmit} className={"w-full rounded-2xl border border-white/10 bg-[#0e1524] p-6"}>
+        <h1 className={"text-xl font-semibold"}>Login</h1>
+        <input name={"email"} className={"mt-5 w-full rounded-lg border border-white/10 bg-[#070b14] px-3 py-2"} />
+        <input type={"password"} name={"password"} className={"mt-4 w-full rounded-lg border border-white/10 bg-[#070b14] px-3 py-2"} />
+        {err && <p className={"mt-3 text-sm text-[#ff2d55]"}>{err}</p>}
+        <button className={"mt-5 w-full rounded-lg bg-[#ff2d55] py-2.5"}>{loading ? "..." : "Continue"}</button>
+        <p className={"mt-4 text-center"}><Link href={"/register"}>Register</Link></p>
       </form>
     </main>
   );
