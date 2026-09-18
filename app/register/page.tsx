@@ -1,13 +1,16 @@
-﻿"use client";
-import Link from "next/link";
+"use client";
 import { FormEvent, useState } from "react";
+
 export default function RegisterPage() {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setErr(""); setMsg(""); setLoading(true);
+    setErr("");
+    setMsg("");
+    setLoading(true);
     const form = new FormData(e.currentTarget);
     const res = await fetch("/api/register", {
       method: "POST",
@@ -20,26 +23,29 @@ export default function RegisterPage() {
         password: form.get("password"),
       }),
     });
-    const data = await res.json().catch(() => ({}));
+    const data = await res.json().catch(function () { return {}; });
     setLoading(false);
-    if (!res.ok) { setErr(data.error || "Could not register"); return; }
-    setMsg(data.message || "Created. Wait for admin.");
+    if (res.ok) {
+      setMsg(data.message ? data.message : "Created. Wait for admin.");
+    } else {
+      setErr(data.error ? data.error : "Could not register");
+    }
   }
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-md items-center px-5">
-      <form onSubmit={onSubmit} className="w-full rounded-2xl border border-white/10 bg-[#0e1524] p-6">
-        <h1 className="text-xl font-semibold">Create account</h1>
-        {["fullName","username","email","phone","password"].map((name) => (
-          <div key={name} className="mt-4">
-            <label className="block text-xs text-white/50">{name}</label>
-            <input name={name} type={name === "password" ? "password" : "text"} required={name !== "phone"} className="mt-1 w-full rounded-lg border border-white/10 bg-[#070b14] px-3 py-2" />
-          </div>
-        ))}
-        {err && <p className="mt-3 text-sm text-[#ff2d55]">{err}</p>}
-        {msg && <p className="mt-3 text-sm text-[#22d3a6]">{msg}</p>}
-        <button disabled={loading} className="mt-5 w-full rounded-lg bg-[#ff2d55] py-2.5 text-sm font-semibold">{loading ? "Saving..." : "Submit"}</button>
-        <p className="mt-4 text-center text-sm"><Link href="/login">Login</Link></p>
+    <main style={{ minHeight: "100vh", background: "#070b14", color: "#fff", padding: 40 }}>
+      <form onSubmit={onSubmit} style={{ maxWidth: 420 }}>
+        <h1>Create account</h1>
+        <p><input name="fullName" placeholder="full name" required /></p>
+        <p><input name="username" placeholder="username" required /></p>
+        <p><input name="email" placeholder="email" required /></p>
+        <p><input name="phone" placeholder="phone" /></p>
+        <p><input name="password" type="password" placeholder="password" required /></p>
+        {err ? <p style={{ color: "#ff2d55" }}>{err}</p> : null}
+        {msg ? <p style={{ color: "#22d3a6" }}>{msg}</p> : null}
+        <button disabled={loading}>{loading ? "Saving..." : "Submit"}</button>
       </form>
+      <p><a href="/login" style={{ color: "#ff2d55" }}>Login</a></p>
     </main>
   );
 }
