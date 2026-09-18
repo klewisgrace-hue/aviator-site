@@ -1,68 +1,66 @@
-import { Nav } from "@/components/Nav";
+import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
-const pendingUsers = [
-  { name: "Ama Boateng", username: "ama", email: "ama@email.com" },
-  { name: "Yaw Owusu", username: "yaw", email: "yaw@email.com" },
-];
-
-const pendingPayments = [
-  { user: "ama", pack: "Gold", amount: 80, ref: "MOMO-2041" },
-  { user: "yaw", pack: "Starter", amount: 30, ref: "MOMO-2042" },
-];
-
-export default function AdminPage() {
-  return (
-    <>
-      <Nav signedIn />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-12">
-        <h1 className="text-3xl font-semibold">Admin</h1>
-        <p className="mt-2 text-sm text-white/55">
-          Approve accounts, confirm MoMo payments, adjust diamonds. Matches Role ADMIN / SUPER_ADMIN
-          in Prisma.
-        </p>
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <section className="rounded-2xl border border-white/10 bg-[#0e1524] p-5">
-            <h2 className="text-sm text-white/60">Pending users</h2>
-            <ul className="mt-4 space-y-3">
-              {pendingUsers.map((u) => (
-                <li key={u.username} className="flex items-center justify-between gap-3 border-b border-white/5 pb-3">
-                  <div>
-                    <p>{u.name}</p>
-                    <p className="text-xs text-white/40">
-                      @{u.username} · {u.email}
-                    </p>
-                  </div>
-                  <button className="rounded-full bg-[#22d3a6]/20 px-3 py-1 text-xs text-[#22d3a6]">
-                    Activate
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section className="rounded-2xl border border-white/10 bg-[#0e1524] p-5">
-            <h2 className="text-sm text-white/60">Pending payments</h2>
-            <ul className="mt-4 space-y-3">
-              {pendingPayments.map((p) => (
-                <li key={p.ref} className="flex items-center justify-between gap-3 border-b border-white/5 pb-3">
-                  <div>
-                    <p>
-                      @{p.user} · {p.pack}
-                    </p>
-                    <p className="text-xs text-white/40">
-                      GHS {p.amount} · {p.ref}
-                    </p>
-                  </div>
-                  <button className="rounded-full bg-[#f5c518]/20 px-3 py-1 text-xs text-[#f5c518]">
-                    Approve
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
+export default async function AdminPage() {
+  const raw = (await cookies()).get("aaa_user");
+  if (!raw) {
+    return <main className="min-h-screen bg-[#070b14] p-10 text-white"><Link href="/login">Login</Link></main>;
+  }
+  let id = "";
+  try { id = String(JSON.parse(raw.value).id || ""); } catch (e) { id = ""; }
+  const me = id ? await prisma.user.findUnique({ where: { id } }) : null;
+  if (!me || (me.role !== "ADMIN" && me.role !== "SUPER_ADMIN")) {
+    return (
+      <main className="min-h-screen bg-[#070b14] p-10 text-white">
+        <p>Admin only. Set role to ADMIN in Neon.</p>
+        <Link href="/dashboard" className="text-[#ff2d55]">Back</Link>
       </main>
-    </>
+    );
+  }
+  const users = await prisma.user.findMany({ orderBy: { createdAt: "desc" } });
+  const pending = users.filter(function (u) { return u.status === "PENDING"; });
+  const active = users.filter(function (u) { return u.status === "ACTIVE"; });
+  const payments = await prisma.payment.findMany({ orderBy: { createdAt: "desc" }, take: 8 });
+  return (
+    <div className="min-h-screen bg-[#070b14] text-[#eef3ff]">
+      <aside className="fixed hidden h-screen w-52 border-r border-white/10 p-4 md:block">
+        <p className="text-[#ff2d55]">AVIATOR AI</p>
+        <p className="text-xs text-white/40">Admin console</p>
+        <nav className="mt-6 space-y-2 text-sm">
+          <span className="block rounded-lg bg-[#ff2d55]/20 px-3 py-2 text-[#ff2d55]">Overview</span>
+          <Link href="/dashboard" className="block px-3 py-2 text-white/60">Member view</Link>
+        </nav>
+      </aside>
+      <main className="p-5 md:pl-56">
+        <h1 className="text-2xl font-semibold">Admin Overview</h1>
+        <p className="text-white/50">{me.fullName} ? {me.role}</p>
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-[#0e1524] p-4"><p className="text-xs text-white/50">Total users</p><p className="text-3xl">{users.length}</p></div>
+          <div className="rounded-2xl border border-white/10 bg-[#0e1524] p-4"><p className="text-xs text-white/50">Active</p><p className="text-3xl">{active.length}</p></div>
+          <div className="rounded-2xl border border-white/10 bg-[#0e1524] p-4"><p className="text-xs text-white/50">Pending</p><p className="text-3xl">{pending.length}</p></div>
+        </div>
+        <h2 className="mt-8 text-lg">Users</h2>
+        <div className="mt-3 overflow-x-auto rounded-2xl border border-white/10">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[#0e1524] text-white/50"><tr><th className="p-3">Name</th><th>Username</th><th>Status</th><th>Role</th><th>Diamonds</th></tr></thead>
+            <tbody>
+              {users.map(function (u) {
+                return (
+                  <tr key={u.id} className="border-t border-white/10">
+                    <td className="p-3">{u.fullName}</td>
+                    <td>{u.username}</td>
+                    <td>{u.status}</td>
+                    <td>{u.role}</td>
+                    <td>{u.diamondBalance}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-6 text-sm text-white/45">Payments in DB: {payments.length}. Approve buttons come after MoMo is wired.</p>
+      </main>
+    </div>
   );
 }
