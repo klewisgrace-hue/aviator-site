@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { PayAction } from "./PayAction";
 import { ActivateButton } from "./ActivateButton";
+import { SettingsForm } from "./SettingsForm";
 
 export default async function AdminPage({
   searchParams,
@@ -100,9 +101,9 @@ export default async function AdminPage({
                 <p className="text-sm text-white/40">No pending payments.</p>
               ) : pending.map((p) => (
                 <div key={p.id} className="rounded-xl border border-white/10 p-3">
-                  <p className="font-semibold">{p.user.fullName} ?? {p.package?.name || "REGULAR"}</p>
+                  <p className="font-semibold">{p.user.fullName} · {p.package?.name || "REGULAR"}</p>
                   <p className="text-sm text-white/50">{p.user.email}</p>
-                  <p className="mt-1 text-sm">GHS {String(p.amount)} ?? {p.status} ?? {p.phoneUsed || "no number"}</p>
+                  <p className="mt-1 text-sm">GHS {String(p.amount)} · {p.status} · {p.phoneUsed || "no number"}</p>
                   <p className="text-xs text-white/40">{p.reference}</p>
                   {"proofImage" in p && (p as any).proofImage ? (
                     <img src={(p as any).proofImage} alt="proof" className="mt-3 max-h-56 rounded-lg border border-white/10" />
@@ -122,8 +123,8 @@ export default async function AdminPage({
           {users.map((u) => (
             <div key={u.id} className="rounded-2xl border border-white/10 bg-[#16100c] p-4">
               <p className="font-semibold">{u.fullName}</p>
-              <p className="text-sm text-white/50">@{u.username} ?? {u.email}</p>
-              <p className="text-sm">{u.status} ?? {u.diamondBalance} diamonds</p>
+              <p className="text-sm text-white/50">@{u.username} · {u.email}</p>
+              <p className="text-sm">{u.status} · {u.diamondBalance} diamonds</p>
               <div className="mt-2">
                 <ActivateButton userId={u.id} status={u.status} />
               </div>
@@ -154,12 +155,7 @@ export default async function AdminPage({
         <section className="mt-4 rounded-2xl border border-white/10 bg-[#16100c] p-4">
           <p className="text-xs tracking-widest text-orange-400">DIAMONDS + PAYOUT</p>
           <h2 className="mt-1 text-2xl">Settings</h2>
-          <Field label="Regular price GHS" value="50" />
-          <Field label="Regular diamonds" value="30" />
-          <Field label="VIP price GHS" value="80" />
-          <Field label="VIP diamonds" value="60" />
-          <Field label="VVIP price GHS" value="180" />
-          <p className="mt-3 text-xs text-white/40">Saving settings to Neon comes in the next pass. Prices above match the pay wizard.</p>
+          <SettingsForm />
         </section>
       )}
     </main>
@@ -183,4 +179,3 @@ function Field(props: { label: string; value: string }) {
     </label>
   );
 }
-
