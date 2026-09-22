@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function LiveBoard() {
+  const router = useRouter();
   const [shown, setShown] = useState("5.40");
   const [conf, setConf] = useState<number | null>(null);
   const [risk, setRisk] = useState("");
   const [left, setLeft] = useState<number | null>(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
-  const [fly, setFly] = useState(true);
 
   async function run() {
     setBusy(true);
@@ -25,43 +26,56 @@ export function LiveBoard() {
     setConf(json.confidence);
     setRisk(json.risk);
     setLeft(json.diamondsLeft);
-    setFly(true);
+    router.refresh();
   }
 
   return (
     <div className="space-y-4">
-      <section className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#1a0b14] to-[#0b1220] p-5">
+      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0b1020] p-5 shadow-[0_0_80px_rgba(255,45,85,0.15)]">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#ff2d55]/20 blur-3xl" />
+        <div className="pointer-events-none absolute -left-8 bottom-0 h-32 w-32 rounded-full bg-emerald-400/10 blur-3xl" />
         <div className="flex items-center justify-between">
-          <span className="rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-semibold">AVIATOR</span>
-          <span className="text-xs text-white/40">LINE UP</span>
+          <span className="rounded-full bg-[#ff2d55] px-2.5 py-0.5 text-[11px] font-bold">LIVE</span>
+          {left !== null ? (
+            <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-300">
+              {left} diamonds
+            </span>
+          ) : null}
         </div>
-        <div className="relative mt-6 h-28">
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-white/10" />
-          <p className={"absolute text-4xl transition-all duration-700 " + (fly ? "bottom-16 left-2/3" : "bottom-2 left-4")}>
-            ✈️
-          </p>
+        <div className="mt-8 flex items-end justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-white/35">Aviator lineup</p>
+            <p className="mt-1 bg-gradient-to-r from-emerald-300 via-white to-amber-300 bg-clip-text text-7xl font-black text-transparent">
+              {shown}x
+            </p>
+          </div>
+          <p className="mb-2 text-5xl">✈️</p>
         </div>
-        <p className="text-xs uppercase tracking-wide text-white/40">Next Round Signal</p>
-        <p className="bg-gradient-to-r from-emerald-400 to-amber-300 bg-clip-text text-6xl font-semibold text-transparent">
-          {shown}x
-        </p>
         {conf !== null ? (
-          <p className="mt-2 text-sm text-white/50">
-            {conf}% · {risk} · {left} diamonds left
-          </p>
-        ) : (
-          <p className="mt-2 text-sm text-white/40">Tap below to use 2 diamonds.</p>
-        )}
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-white/5 p-3">
+              <p className="text-[11px] text-white/40">Confidence</p>
+              <p className="text-2xl font-semibold text-violet-300">{conf}%</p>
+            </div>
+            <div className="rounded-2xl bg-white/5 p-3">
+              <p className="text-[11px] text-white/40">Risk</p>
+              <p className="text-2xl font-semibold text-amber-300">{risk}</p>
+            </div>
+          </div>
+        ) : null}
         <button
           disabled={busy}
           onClick={run}
-          className="mt-5 w-full rounded-full bg-[#ff2d55] py-3 text-sm font-semibold disabled:opacity-50"
+          className="mt-6 w-full rounded-full bg-gradient-to-r from-[#ff2d55] to-[#ff6b35] py-3.5 text-sm font-bold shadow-lg shadow-[#ff2d55]/30 disabled:opacity-50"
         >
-          {busy ? "Flying..." : "Get next prediction (2 diamonds)"}
+          {busy ? "Taking off..." : "Get next prediction · 2 diamonds"}
         </button>
-        {err ? <p className="mt-3 text-sm text-[#ff2d55]">{err}</p> : null}
+        {err ? <p className="mt-3 text-center text-sm text-[#ff6b7a]">{err}</p> : null}
       </section>
-      <a href="/packages" className="inline-block rounded-full bg-[#ff2d55] px-5 py-2 text-sm font-semibold">
+      <a
+        href="/packages"
+        className="block rounded-full border border-white/15 py-3 text-center text-sm font-semibold text-white/80"
+      >
         Buy diamonds
       </a>
     </div>
