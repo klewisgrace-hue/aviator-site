@@ -79,6 +79,7 @@ model Payment {
   currency      String        @default("GHS")
   reference     String        @unique
   phoneUsed     String?
+  proofImage    String?       @db.Text
   status        PaymentStatus @default(PENDING)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt

@@ -108,7 +108,12 @@ export function LiveBoard() {
           </tbody>
         </table>
       </section>
-    </div>
+    
+      <div className="flex gap-3">
+        <a href="/packages" className="rounded-lg bg-[#ff2d55] px-4 py-2 text-sm">Buy diamonds</a>
+        <a href="/analyze" className="rounded-lg border border-white/15 px-4 py-2 text-sm">Run AI analysis (2 diamonds)</a>
+      </div>
+</div>
   );
 }
 
@@ -117,6 +122,11 @@ function Stat(props: { label: string; value: string }) {
     <div className="rounded-2xl border border-white/10 bg-[#0e1524] p-4">
       <p className="text-xs text-white/45">{props.label}</p>
       <p className="mt-2 text-2xl font-semibold">{props.value}</p>
-    </div>
+    
+      <div className="flex gap-3">
+        <a href="/packages" className="rounded-lg bg-[#ff2d55] px-4 py-2 text-sm">Buy diamonds</a>
+        <a href="/analyze" className="rounded-lg border border-white/15 px-4 py-2 text-sm">Run AI analysis (2 diamonds)</a>
+      </div>
+</div>
   );
 }

@@ -14,6 +14,7 @@ export default function PayWizardPage() {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+  const [proofImage, setProofImage] = useState("");
 
   const amount = country === "NG" ? 10000 : 50;
   const currency = country === "NG" ? "NGN" : "GHS";
@@ -34,6 +35,7 @@ export default function PayWizardPage() {
         senderName,
         txId,
         country,
+        proofImage,
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -161,15 +163,22 @@ export default function PayWizardPage() {
             <input value={senderName} onChange={(e) => setSenderName(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-[#2a1810] px-3 py-3" placeholder="e.g. Abel Afriyie" />
             <label className="mt-4 block text-xs text-white/50">YOUR NUMBER YOU PAID FROM *</label>
             <input value={fromNumber} onChange={(e) => setFromNumber(e.target.value)} className="mt-1 w-full rounded-xl border border-white/10 bg-[#2a1810] px-3 py-3" placeholder="e.g. 0241234567" />
-            <div className="mt-4 rounded-xl border border-dashed border-orange-500/40 bg-[#2a1810] p-6 text-center text-sm text-white/50">
-              Screenshot upload comes next version. Submit details now for admin review.
-            </div>
+            <label className="mt-4 block text-xs text-white/50">UPLOAD PAYMENT SCREENSHOT *</label>
+            <input type="file" accept="image/*" className="mt-2 w-full text-sm" onChange={async (e) => {
+              const file = e.target.files && e.target.files[0];
+              if (!file) return;
+              if (file.size > 900000) { setErr("Image too large. Use a smaller screenshot."); return; }
+              const reader = new FileReader();
+              reader.onload = () => setProofImage(String(reader.result || ""));
+              reader.readAsDataURL(file);
+            }} />
+            {proofImage ? <p className="mt-2 text-xs text-emerald-400">Screenshot attached</p> : null}
             <p className="mt-4 text-xs text-orange-300">
               IMPORTANT: Fake proof = permanent ban. Admin verifies manually.
             </p>
             {err ? <p className="mt-3 text-sm text-red-400">{err}</p> : null}
             <button
-              disabled={busy || !senderName || !fromNumber}
+              disabled={busy || !senderName || !fromNumber || !proofImage}
               onClick={submitProof}
               className="mt-6 w-full rounded-full bg-orange-500 py-3 font-semibold text-black disabled:opacity-40"
             >

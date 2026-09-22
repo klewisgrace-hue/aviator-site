@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     const phone = body.phone ? String(body.phone) : "";
     const senderName = body.senderName ? String(body.senderName) : "";
     const txId = body.txId ? String(body.txId) : "";
+    const proofImage = body.proofImage ? String(body.proofImage) : "";
 
     const packId = "pack-" + name.toLowerCase().replace(/\s+/g, "-");
     const pack = await prisma.package.upsert({
@@ -40,6 +41,7 @@ export async function POST(req: Request) {
         currency: amount >= 1000 ? "NGN" : "GHS",
         reference: "MOMO" + Date.now(),
         phoneUsed: phone || null,
+        proofImage: proofImage || null,
         status: "PENDING",
       },
     });
