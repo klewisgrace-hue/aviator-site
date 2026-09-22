@@ -102,9 +102,6 @@ export default async function AdminPage({
                   <p className="text-sm text-white/50">{p.user.email}</p>
                   <p className="mt-1 text-sm">GHS {String(p.amount)} · {p.status} · {p.phoneUsed || "no number"}</p>
                   <p className="text-xs text-white/40">{p.reference}</p>
-                  {"proofImage" in p && (p as any).proofImage ? (
-                    <img src={(p as any).proofImage} alt="proof" className="mt-3 max-h-56 rounded-lg border border-white/10" />
-                  ) : null}
                   <div className="mt-3">
                     <PayAction paymentId={p.id} />
                   </div>
