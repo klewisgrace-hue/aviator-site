@@ -43,7 +43,7 @@ export default function PayWizardPage() {
       return;
     }
     setMsg("Proof submitted. Ref " + data.reference + ". Wait for admin approval.");
-    setStep(4);
+    window.location.href = "/waiting";
   }
 
   return (
