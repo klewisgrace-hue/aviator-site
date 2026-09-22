@@ -12,19 +12,22 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const name = body.name ? String(body.name) : "Starter";
-    const amount = Number(body.amount || 30);
-    const diamonds = Number(body.diamonds || 20);
+    const amount = Number(body.amount || 50);
+    const diamonds = Number(body.diamonds || 30);
     const phone = body.phone ? String(body.phone) : "";
+    const senderName = body.senderName ? String(body.senderName) : "";
+    const txId = body.txId ? String(body.txId) : "";
 
+    const packId = "pack-" + name.toLowerCase().replace(/\s+/g, "-");
     const pack = await prisma.package.upsert({
-      where: { id: "pack-" + name.toLowerCase() },
+      where: { id: packId },
       update: { diamonds, price: amount, name },
       create: {
-        id: "pack-" + name.toLowerCase(),
+        id: packId,
         name,
         diamonds,
         price: amount,
-        currency: "GHS",
+        currency: amount >= 1000 ? "NGN" : "GHS",
         analysesCount: Math.max(5, Math.round(diamonds / 2)),
       },
     });
@@ -34,7 +37,7 @@ export async function POST(req: Request) {
         userId,
         packageId: pack.id,
         amount,
-        currency: "GHS",
+        currency: amount >= 1000 ? "NGN" : "GHS",
         reference: "MOMO" + Date.now(),
         phoneUsed: phone || null,
         status: "PENDING",
@@ -43,10 +46,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      message: "Payment submitted. Wait for admin approval. Diamonds come after approval.",
+      message: "Payment proof saved. Admin must approve before diamonds are added.",
       reference: payment.reference,
       package: name,
       diamonds,
+      senderName,
+      txId,
     });
   } catch (e) {
     console.error(e);
