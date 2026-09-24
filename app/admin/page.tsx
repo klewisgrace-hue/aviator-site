@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PayAction } from "./PayAction";
 import { ActivateButton } from "./ActivateButton";
 import { SettingsForm } from "./SettingsForm";
+import { MakePartner } from "./MakePartner";
 
 export default async function AdminPage({
   searchParams,
@@ -41,7 +42,10 @@ export default async function AdminPage({
   });
   const pending = payments.filter((p) => p.status === "PENDING");
   const analyses = await prisma.analysis.count();
-
+const earns = await prisma.partnerEarning.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
+  const partners = users.filter((u) => u.isPartner);
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
   const tabs = [
     ["home", "Home"],
     ["users", "Users"],
@@ -125,14 +129,38 @@ export default async function AdminPage({
               <p className="font-semibold">{u.fullName}</p>
               <p className="text-sm text-white/50">@{u.username} · {u.email}</p>
               <p className="text-sm">{u.status} · {u.diamondBalance} diamonds</p>
-              <div className="mt-2">
+              {u.isPartner ? <p className="text-sm text-orange-300">Partner {u.commissionRate}% · you keep {100 - u.commissionRate}%</p> : null}
+              <div className="mt-2 flex flex-wrap gap-2">
                 <ActivateButton userId={u.id} status={u.status} />
+                <MakePartner userId={u.id} />
               </div>
             </div>
           ))}
         </section>
       )}
-
+{tab === "users" && (
+        <section className="mt-4 space-y-3">
+          <h2 className="text-xl">Partner money</h2>
+          {partners.length === 0 ? <p className="text-sm text-white/40">No partners yet. Tap Make partner on a user.</p> : null}
+          {partners.map((u) => {
+            const rows = earns.filter((e) => e.partnerId === u.id);
+            const todayRows = rows.filter((e) => new Date(e.createdAt) >= start);
+            const theirAll = rows.reduce((s, e) => s + Number(e.amount), 0);
+            const theirToday = todayRows.reduce((s, e) => s + Number(e.amount), 0);
+            const mine = (n: number, pct: number) => (pct > 0 ? (n * (100 - pct)) / pct : 0);
+            return (
+              <div key={u.id} className="rounded-2xl border border-orange-500/30 bg-[#16100c] p-4 text-sm">
+                <p className="font-semibold">{u.fullName} · @{u.username}</p>
+                <p className="text-orange-300">Their cut {u.commissionRate}% · Your cut {100 - u.commissionRate}%</p>
+                <p className="mt-2">Today they made GHS {theirToday.toFixed(2)}</p>
+                <p>Today you keep GHS {mine(theirToday, u.commissionRate).toFixed(2)}</p>
+                <p className="mt-2">All time they made GHS {theirAll.toFixed(2)}</p>
+                <p>All time you keep GHS {mine(theirAll, u.commissionRate).toFixed(2)}</p>
+              </div>
+            );
+          })}
+        </section>
+      )}
       {tab === "tips" && (
         <section className="mt-4 rounded-2xl border border-white/10 bg-[#16100c] p-4">
           <p>Tips tab: send the Instant Virtuals Tips screenshot and I will match it next.</p>
