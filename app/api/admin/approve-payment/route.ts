@@ -49,6 +49,22 @@ export async function POST(req: Request) {
           description: "Admin approved package",
         },
       });
+      if (user.referredById) {
+        const partner = await tx.user.findUnique({ where: { id: user.referredById } });
+        if (partner && partner.isPartner) {
+          const percent = partner.commissionRate || 20;
+          const cut = Number(payment.amount) * percent / 100;
+          await tx.partnerEarning.create({
+            data: {
+              partnerId: partner.id,
+              paymentId: payment.id,
+              amount: cut,
+              percent,
+              source: Number(payment.amount) >= 200 ? "DIAMONDS" : "FEE",
+            },
+          });
+        }
+      }
     });
 
     return NextResponse.json({ ok: true });

@@ -10,6 +10,7 @@ export async function POST(req: Request) {
     const email = String(body.email ? body.email : "").trim().toLowerCase();
     const phone = String(body.phone ? body.phone : "").trim();
     const password = String(body.password ? body.password : "");
+    const ref = String(body.ref ? body.ref : "").trim().toLowerCase();
 
     if (!fullName || !username || !email || password.length < 6) {
       return NextResponse.json({ error: "Fill all fields. Password min 6 characters." }, { status: 400 });
@@ -22,6 +23,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email or username already used." }, { status: 409 });
     }
 
+    let referredById = null;
+    if (ref) {
+      const partner = await prisma.user.findFirst({
+        where: { partnerCode: ref, isPartner: true },
+      });
+      if (partner) referredById = partner.id;
+    }
     const user = await prisma.user.create({
       data: {
         fullName,
@@ -31,6 +39,7 @@ export async function POST(req: Request) {
         passwordHash: await bcrypt.hash(password, 12),
         status: "PENDING",
         role: "USER",
+        referredById,
       },
     });
 

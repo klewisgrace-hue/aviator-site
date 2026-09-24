@@ -22,6 +22,7 @@ export default function RegisterPage() {
         email: form.get("email"),
         phone: form.get("phone"),
         password: form.get("password"),
+        ref: form.get("ref") || new URLSearchParams(window.location.search).get("ref"),
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -45,6 +46,7 @@ export default function RegisterPage() {
         <input name="email" placeholder="email" required style={box} />
         <input name="phone" placeholder="phone" style={box} />
         <input name="password" type="password" placeholder="password" required style={box} />
+        <input name="ref" placeholder="partner code (optional)" style={box} />
         {err ? <p className="text-sm text-[#ff2d55]">{err}</p> : null}
         <button disabled={loading} className="mt-2 w-full rounded-full bg-[#ff2d55] py-3 font-semibold">
           {loading ? "Saving..." : "Create and pay fee"}
