@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-
+function num(value: unknown, fallback: number) {
+  const n = Number(value);
+  if (Number.isFinite(n) && String(value).trim() !== "") return n;
+  return fallback;
+}
 const DEFAULT_MOMO = {
   network: "TELECEL",
   number: "0204375237",
@@ -41,10 +45,10 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const packs = [
-      { name: "Regular", price: Number(body.regularPrice  50), diamonds: Number(body.regularDiamonds  5) },
-      { name: "VIP", price: Number(body.vipPrice  80), diamonds: Number(body.vipDiamonds  10) },
-      { name: "VVIP", price: Number(body.vvipPrice  180), diamonds: Number(body.vvipDiamonds  20) },
+   const packs = [
+      { name: "Regular", price: num(body.regularPrice, 50), diamonds: num(body.regularDiamonds, 5) },
+      { name: "VIP", price: num(body.vipPrice, 80), diamonds: num(body.vipDiamonds, 10) },
+      { name: "VVIP", price: num(body.vvipPrice, 180), diamonds: num(body.vvipDiamonds, 20) },
     ];
 
     for (const p of packs) {
