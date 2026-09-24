@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 type Step = 1 | 2 | 3 | 4;
@@ -15,6 +15,23 @@ export default function PayWizardPage() {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const [proofImage, setProofImage] = useState("");
+const [momo, setMomo] = useState({
+    network: "TELECEL",
+    number: "0204375237",
+    name: "MARY TETTEH",
+    network2: "",
+    number2: "",
+    name2: "",
+  });
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.momo) setMomo((old) => ({ ...old, ...data.momo }));
+      })
+      .catch(() => {});
+  }, []);
 
   const amount = country === "NG" ? 10000 : 50;
   const currency = country === "NG" ? "NGN" : "GHS";
@@ -108,9 +125,16 @@ export default function PayWizardPage() {
             <p className="mt-2 text-sm text-white/50">Send the exact amount, then upload your proof below</p>
             <div className="mt-6 rounded-2xl border border-white/10 bg-[#2a1810] p-4">
               <p className="text-center text-xs tracking-widest text-white/40">↓ SEND TO ↓</p>
-              <Row k="NETWORK" v="TELECEL" />
-              <Row k="MOBILE MONEY NUMBER" v="0204375237" accent />
-              <Row k="ACCOUNT NAME" v="MARY TETTEH" />
+             <Row k="NETWORK" v={momo.network || "TELECEL"} />
+<Row k="MOBILE MONEY NUMBER" v={momo.number} accent />
+<Row k="ACCOUNT NAME" v={momo.name} />
+{momo.number2 ? (
+  <>
+    <Row k="NETWORK 2" v={momo.network2 || "MOMO"} />
+    <Row k="NUMBER 2" v={momo.number2} accent />
+    <Row k="NAME 2" v={momo.name2} />
+  </>
+) : null}
               <Row k="AMOUNT" v={"GH¢" + amount} green />
               <ol className="mt-4 space-y-2 text-sm text-white/70">
                 <li>1. Dial *170# (MTN) / *110# (Telecel) / *718# (AT)</li>
